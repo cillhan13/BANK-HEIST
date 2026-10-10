@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bank Heist: Safe Code</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game">
+
+    <!-- AUDIO CONTROLS (music on/off + volume). Visible on every screen. -->
+    <div id="audio-bar" class="audio-bar">
+      <button id="music-btn" class="mini-btn" type="button" aria-pressed="true">Music: ON</button>
+      <label class="volume-label" for="volume-slider">Volume
+        <input id="volume-slider" type="range" min="0" max="100" value="60">
+      </label>
+    </div>
+
+    <!-- START SCREEN (the homepage) -->
+    <section id="start-screen" class="screen active">
+
+      <!-- Hero: vault emblem + title -->
+      <div class="hero">
+        <div class="hero-vault" aria-hidden="true">
+          <div class="hv-ring"></div>
+          <span class="hv-spoke s1"></span>
+          <span class="hv-spoke s2"></span>
+          <span class="hv-spoke s3"></span>
+          <div class="hv-hub">&#128274;</div>
+        </div>
+        <p class="hero-eyebrow">TOP SECRET &bull; VAULT BREAK-IN</p>
+        <h1 class="hero-title" aria-label="Bank Heist: Safe Code">BANK HEIST<span>SAFE CODE</span></h1>
+        <p class="tagline">Pick a subject. Answer 10 questions. Collect the code. Crack the safe.</p>
+      </div>
+
+      <!-- Mission briefing: the rules -->
+      <div class="briefing">
+        <div class="briefing-head">MISSION BRIEFING</div>
+
+        <!-- The most important rule -->
+        <div class="spotlight">
+          <div class="spot-title">&#128273; COLLECT <strong>6 SECRET CODE DIGITS</strong>!</div>
+          <p class="spot-text">
+            <strong>6 of the 10 questions</strong> contain a secret safe-code digit.
+            Answer them correctly to earn the digit.
+          </p>
+          <p class="spot-warning">
+            <strong>IMPORTANT:</strong> You must remember all 6 digits.
+            Each digit is shown only <strong>TWICE</strong> during the quiz. After question 10,
+            the full code appears for just <strong>5 seconds</strong>, then it disappears.
+            Memorise it carefully!
+          </p>
+        </div>
+
+        <ul class="rule-grid">
+          <li><span class="ri">&#10084;&#65039;</span><span>You start with <strong>5 lives</strong></span></li>
+          <li><span class="ri">&#9201;&#65039;</span><span>Each question has a <strong>30-second timer</strong></span></li>
+          <li><span class="ri">&#11088;</span><span>Each correct answer gives <strong>10 points</strong></span></li>
+          <li><span class="ri">&#128221;</span><span>You must answer <strong>10 questions</strong></span></li>
+          <li><span class="ri">&#128148;</span><span>A wrong answer or timeout costs <strong>1 life</strong></span></li>
+          <li><span class="ri">&#128274;</span><span>You see the full code for only <strong>5 seconds</strong> before the vault</span></li>
+        </ul>
+      </div>
+
+      <button id="start-btn" class="btn btn-start" type="button">Start Game</button>
+      <p class="music-hint">&#127925; Music starts after your first click.</p>
+    </section>
+
+    <!-- NEW: THEME SELECTION SCREEN -->
+    <section id="theme-screen" class="screen">
+      <div class="nav-row">
+        <button id="themes-home-btn" class="mini-btn" type="button">&larr; Back to Homepage</button>
+      </div>
+      <h2>Choose Your Target</h2>
+      <p class="tagline">Pick ONE theme. All 10 questions will come from it.</p>
+
+      <!-- The four cards are built by game.js from the THEMES data -->
+      <div id="theme-grid" class="theme-grid"></div>
+
+      <p id="theme-hint" class="theme-hint">Select a theme to continue.</p>
+      <button id="start-quiz-btn" class="btn hidden" type="button">Start Quiz</button>
+    </section>
+
+    <!-- QUIZ SCREEN -->
+    <section id="quiz-screen" class="screen">
+      <!-- NEW: navigation + theme name -->
+      <div class="nav-row">
+        <button id="quiz-themes-btn" class="mini-btn" type="button">&larr; Back to Themes</button>
+        <span id="quiz-theme-badge" class="theme-badge"></span>
+        <button id="quiz-home-btn" class="mini-btn" type="button">Homepage</button>
+      </div>
+
+      <div class="hud">
+        <div>Question <span id="q-number">1</span>/<span id="q-total">10</span></div>
+        <div>Lives: <span id="lives"></span></div>
+        <div>Score: <span id="score">0</span></div>
+      </div>
+
+      <!-- Shows WHICH digits you found (never the digit values) -->
+      <div class="code-progress">
+        Secret code:
+        <span id="code-progress"></span>
+      </div>
+
+      <div class="timer-track"><div id="timer-bar"></div></div>
+      <div class="timer-text"><span id="time-left">15</span>s</div>
+
+      <h2 id="question-text">Question goes here</h2>
+
+      <div id="answers"></div>
+
+      <p id="feedback" class="feedback"></p>
+
+      <!-- The digit reveal. Appears only after a correct answer to a digit question.
+           The same digit is shown twice automatically, then it disappears. -->
+      <div id="reveal" class="reveal hidden">
+        <div class="reveal-label">MEMORISE THIS DIGIT!</div>
+        <div id="reveal-digit" class="reveal-digit"></div>
+        <p class="reveal-note">
+          Code digit <span id="reveal-pos">1</span> of <span id="reveal-total">6</span>
+          &middot; <span id="reveal-status">Showing 1 of 2</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- NEW: MEMORISE THE SAFE CODE SCREEN (5 seconds, then the keypad opens by itself) -->
+    <section id="memorise-screen" class="screen">
+      <div class="nav-row">
+        <button id="memo-themes-btn" class="mini-btn" type="button">&larr; Back to Themes</button>
+        <button id="memo-home-btn" class="mini-btn" type="button">Homepage</button>
+      </div>
+
+      <h2 class="memo-title">MEMORISE THE SAFE CODE!</h2>
+      <p class="memo-instruction">
+        You have 5 seconds to memorise all 6 digits.
+        The code will disappear when the timer reaches zero!
+      </p>
+
+      <!-- The 6 digits are filled in by game.js and removed again when time is up -->
+      <div id="memo-code" class="memo-code" aria-label="The safe code"></div>
+
+      <div class="memo-timer-wrap">
+        <div id="memo-timer" class="memo-timer" role="timer" aria-label="Seconds left to memorise the code">5</div>
+        <div class="memo-bar"><div id="memo-bar-fill" class="memo-bar-fill"></div></div>
+      </div>
+
+      <p class="memo-reminder">Remember the code carefully. You will need it to unlock the vault!</p>
+    </section>
+
+    <!-- SAFE CODE SCREEN: realistic vault door with keypad -->
+    <section id="code-screen" class="screen">
+      <div class="nav-row">
+        <button id="vault-themes-btn" class="mini-btn" type="button">&larr; Back to Themes</button>
+        <span id="vault-theme-badge" class="theme-badge"></span>
+        <button id="vault-home-btn" class="mini-btn" type="button">Homepage</button>
+      </div>
+
+      <h2>The Vault</h2>
+      <p class="vault-hint">
+        Enter the 6-digit code. Use the keypad or your keyboard.
+        <span class="code-progress vault-progress">Digits secured: <span id="vault-progress"></span></span>
+        <span id="attempts-text" class="attempts"></span>
+      </p>
+
+      <div id="vault">
+        <!-- What you see behind the door -->
+        <div id="vault-inside">
+          <div class="gold-row row1"></div>
+          <div class="gold-row row2"></div>
+          <div class="gold-row row3"></div>
+        </div>
+
+        <!-- The heavy metal door (the keypad is mounted on it) -->
+        <div id="vault-door">
+          <span class="bolt b1"></span><span class="bolt b2"></span>
+          <span class="bolt b3"></span><span class="bolt b4"></span>
+
+          <div class="door-layout">
+            <div class="wheel-area">
+              <div id="wheel">
+                <span class="spoke s1"></span>
+                <span class="spoke s2"></span>
+                <span class="spoke s3"></span>
+                <span class="hub"></span>
+              </div>
+            </div>
+
+            <div id="keypad-panel">
+              <div id="light" class="light"></div>
+              <div id="code-display" aria-label="Code entered so far"></div>
+              <div id="vault-status" class="vault-status" aria-live="polite">ENTER CODE</div>
+              <div id="keypad">
+                <button class="key" type="button" data-key="1">1</button>
+                <button class="key" type="button" data-key="2">2</button>
+                <button class="key" type="button" data-key="3">3</button>
+                <button class="key" type="button" data-key="4">4</button>
+                <button class="key" type="button" data-key="5">5</button>
+                <button class="key" type="button" data-key="6">6</button>
+                <button class="key" type="button" data-key="7">7</button>
+                <button class="key" type="button" data-key="8">8</button>
+                <button class="key" type="button" data-key="9">9</button>
+                <button class="key key-clear" id="clear-btn" type="button">Clear</button>
+                <button class="key" type="button" data-key="0">0</button>
+                <button class="key key-enter" id="enter-btn" type="button">Enter</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p id="unlock-banner" class="unlock-banner hidden">SAFE UNLOCKED!</p>
+    </section>
+
+    <!-- RESULT SCREEN (NEW: full summary) -->
+    <section id="result-screen" class="screen">
+      <h1 id="result-title"></h1>
+      <p id="result-message"></p>
+
+      <div class="result-grid">
+        <div class="result-card">
+          <div class="rc-label">Game Result</div>
+          <div id="res-result" class="rc-value">-</div>
+        </div>
+        <div class="result-card">
+          <div class="rc-label">Selected Theme</div>
+          <div id="res-theme" class="rc-value">-</div>
+        </div>
+        <div class="result-card">
+          <div class="rc-label">Correct Answers</div>
+          <div id="res-correct" class="rc-value">-</div>
+        </div>
+        <div class="result-card">
+          <div class="rc-label">Incorrect Answers</div>
+          <div id="res-incorrect" class="rc-value">-</div>
+        </div>
+        <div class="result-card">
+          <div class="rc-label">Final Score</div>
+          <div id="final-score" class="rc-value">0</div>
+        </div>
+        <div class="result-card">
+          <div class="rc-label">Time Used</div>
+          <div id="res-time" class="rc-value">-</div>
+        </div>
+        <div class="result-card">
+          <div class="rc-label">Safe Status</div>
+          <div id="res-safe" class="rc-value">-</div>
+        </div>
+        <div class="result-card">
+          <div class="rc-label">Code Digits Found</div>
+          <div id="res-digits" class="rc-value">-</div>
+        </div>
+      </div>
+
+      <div class="result-buttons">
+        <button id="restart-btn" class="btn" type="button">Play Again</button>
+        <button id="result-home-btn" class="btn btn-secondary" type="button">Back to Homepage</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

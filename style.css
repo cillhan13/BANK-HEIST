@@ -1,0 +1,1138 @@
+/* ---------- Basic page setup ---------- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #2b2f36 0%, #101216 100%);
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #f2f2f2;
+}
+
+/* ---------- Game box (looks like a vault door) ---------- */
+#game {
+  width: 760px;
+  max-width: 95vw;
+  min-height: 520px;
+  padding: 32px;
+  background: #1c1f26;
+  border: 6px solid #c9a227;
+  border-radius: 18px;
+  box-shadow: 0 0 30px rgba(201, 162, 39, 0.35);
+  text-align: center;
+}
+
+/* Only the active screen is shown */
+.screen {
+  display: none;
+}
+.screen.active {
+  display: block;
+}
+
+/* NEW: helper class used to hide things */
+.hidden {
+  display: none !important;
+}
+
+h1 {
+  color: #f5c542;
+  letter-spacing: 2px;
+  margin: 10px 0;
+}
+
+h2 {
+  margin: 18px 0;
+  line-height: 1.4;
+}
+
+.vault-icon {
+  font-size: 64px;
+}
+
+.tagline {
+  color: #bfc5d0;
+  font-size: 18px;
+}
+
+.rules {
+  display: inline-block;
+  text-align: left;
+  margin: 16px 0 24px;
+  line-height: 1.8;
+  color: #d8dce4;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  background: #c9a227;
+  color: #1c1f26;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 32px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.2s;
+}
+.btn:hover {
+  background: #f5c542;
+  transform: scale(1.04);
+}
+
+/* ---------- NEW: Audio bar (music button + volume) ---------- */
+.audio-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #bfc5d0;
+}
+.mini-btn {
+  background: #2a2f3a;
+  color: #f5c542;
+  border: 2px solid #4a5160;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.mini-btn:hover {
+  border-color: #f5c542;
+}
+.mini-btn.off {
+  color: #8a8f99;
+}
+.volume-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.volume-label input {
+  width: 110px;
+  accent-color: #c9a227;
+}
+/* If the browser has no audio support, hide the volume slider */
+.audio-bar.unsupported .volume-label {
+  display: none;
+}
+.audio-bar.unsupported .mini-btn {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---------- HUD (lives, score, question number) ---------- */
+.hud {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+
+/* NEW: shows which code digits you have found (but never the digits) */
+.code-progress {
+  margin-bottom: 12px;
+  color: #bfc5d0;
+  font-size: 15px;
+}
+.code-progress .cp {
+  display: inline-block;
+  width: 22px;
+  font-size: 18px;
+  color: #5b6270;
+}
+.code-progress .cp.found {
+  color: #f5c542;
+}
+.code-progress .cp.missed {
+  color: #ef5350;
+}
+
+/* ---------- Timer ---------- */
+.timer-track {
+  height: 12px;
+  background: #3a3f4a;
+  border-radius: 6px;
+  overflow: hidden;
+}
+#timer-bar {
+  height: 100%;
+  width: 100%;
+  background: #4caf50;
+  transition: width 1s linear, background 0.3s;
+}
+#timer-bar.low {
+  background: #e53935;
+}
+.timer-text {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #bfc5d0;
+}
+
+/* ---------- Answer buttons ---------- */
+#answers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.answer-btn {
+  background: #2a2f3a;
+  color: #f2f2f2;
+  border: 2px solid #4a5160;
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 17px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.answer-btn:hover:enabled {
+  border-color: #f5c542;
+  background: #343a47;
+}
+.answer-btn:disabled {
+  cursor: default;
+}
+
+/* Visual feedback */
+.answer-btn.correct {
+  background: #2e7d32;
+  border-color: #66bb6a;
+}
+.answer-btn.wrong {
+  background: #b71c1c;
+  border-color: #ef5350;
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.feedback {
+  min-height: 28px;
+  margin-top: 18px;
+  font-size: 18px;
+  font-weight: bold;
+}
+.feedback.good { color: #66bb6a; }
+.feedback.bad { color: #ef5350; }
+
+/* ---------- NEW: digit reveal box (after a correct answer) ---------- */
+.reveal {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "digit label"
+    "digit note"
+    "digit btn";
+  column-gap: 24px;
+  row-gap: 6px;
+  align-items: center;
+  text-align: left;
+  margin-top: 8px;
+  padding: 14px 24px;
+  background: #101216;
+  border: 3px solid #c9a227;
+  border-radius: 12px;
+  animation: pop 0.3s;
+}
+.reveal-label {
+  grid-area: label;
+  color: #bfc5d0;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.reveal-digit {
+  grid-area: digit;
+  min-width: 80px;
+  text-align: center;
+  font-size: 76px;
+  font-weight: bold;
+  line-height: 1.1;
+  color: #f5c542;
+  text-shadow: 0 0 18px rgba(245, 197, 66, 0.6);
+}
+.reveal-note {
+  grid-area: note;
+  margin: 0;
+  color: #d8dce4;
+}
+.reveal .btn {
+  grid-area: btn;
+  justify-self: start;
+  padding: 10px 24px;
+  font-size: 16px;
+}
+
+@keyframes pop {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* ---------- NEW: the vault (door + keypad) ---------- */
+.vault-hint {
+  margin: 0 0 10px;
+  color: #bfc5d0;
+}
+.attempts {
+  display: block;
+  margin-top: 4px;
+  color: #f5c542;
+  font-weight: bold;
+}
+
+/* The steel frame. "perspective" gives the door its 3D swing. */
+#vault {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin: 12px auto 8px;
+  border: 10px solid #4a505c;
+  border-radius: 16px;
+  background: #050506;
+  overflow: hidden;
+  perspective: 1500px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 0 0 2px #6b7380;
+}
+
+/* Behind the door: a pile of gold bars, dark until the door opens */
+#vault-inside {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: radial-gradient(circle at 50% 65%, #6b4f0e 0%, #1b1405 60%, #050506 100%);
+  filter: brightness(0.35);
+  transition: filter 2.4s ease-in-out 0.3s;
+}
+.gold-row {
+  height: 44px;
+  border-radius: 6px;
+  background: repeating-linear-gradient(90deg, #f5c542 0 70px, #8a6a10 70px 74px);
+  box-shadow: inset 0 6px 8px rgba(255, 255, 255, 0.35), inset 0 -8px 8px rgba(0, 0, 0, 0.4);
+}
+.gold-row.row1 { width: 45%; }
+.gold-row.row2 { width: 70%; }
+.gold-row.row3 { width: 95%; }
+#vault.open #vault-inside {
+  filter: brightness(1.15);
+}
+
+/* The heavy door. It swings open on its left hinge. */
+#vault-door {
+  position: relative;
+  padding: 26px 22px;
+  background: linear-gradient(145deg, #8d95a3 0%, #5c6370 35%, #3f444f 70%, #6a7280 100%);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.12), inset 0 0 30px rgba(0, 0, 0, 0.45);
+  transform-origin: left center;
+  backface-visibility: hidden;
+  transition: transform 2.4s cubic-bezier(0.6, 0.05, 0.3, 1);
+}
+#vault.open #vault-door {
+  transform: rotateY(88deg);
+  pointer-events: none;
+}
+
+.bolt {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #d8dde6, #4a505c 70%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.bolt.b1 { top: 8px; left: 8px; }
+.bolt.b2 { top: 8px; right: 8px; }
+.bolt.b3 { bottom: 8px; left: 8px; }
+.bolt.b4 { bottom: 8px; right: 8px; }
+
+.door-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 20px;
+}
+.wheel-area {
+  flex: 1 1 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* The big locking wheel. It spins when the code is correct. */
+#wheel {
+  position: relative;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  border: 10px solid #444a55;
+  background: radial-gradient(circle at 35% 30%, #aab1bd, #5a606c 60%, #343842);
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.6), 0 4px 10px rgba(0, 0, 0, 0.5);
+  transition: transform 1.2s ease-in-out;
+}
+#vault.unlocking #wheel,
+#vault.open #wheel {
+  transform: rotate(540deg);
+}
+.spoke {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #d0d5de, #6a7180 60%, #3c414c);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+.spoke.s1 { transform: rotate(0deg); }
+.spoke.s2 { transform: rotate(60deg); }
+.spoke.s3 { transform: rotate(120deg); }
+.hub {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 52px;
+  height: 52px;
+  margin: -26px 0 0 -26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f5d77a, #b88a14 65%, #6b4f0e);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+/* The digital keypad */
+#keypad-panel {
+  position: relative;
+  flex: 1 1 0;
+  max-width: 240px;
+  padding: 12px;
+  background: #15181e;
+  border: 3px solid #2a2e37;
+  border-radius: 10px;
+  box-shadow: inset 0 0 12px #000;
+}
+.light {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #6b5a1a;
+}
+.light.red {
+  animation: flash 0.3s 4;
+}
+.light.green {
+  background: #4cff7a;
+  box-shadow: 0 0 12px 3px rgba(76, 255, 122, 0.8);
+}
+@keyframes flash {
+  0%, 100% { background: #ff2a2a; box-shadow: 0 0 14px 4px rgba(255, 42, 42, 0.9); }
+  50% { background: #4a0d0d; box-shadow: none; }
+}
+@keyframes alarmBorder {
+  0%, 100% { border-color: #ff2a2a; }
+  50% { border-color: #2a2e37; }
+}
+#vault.alarm #keypad-panel {
+  animation: alarmBorder 0.3s 4;
+}
+/* The whole vault shakes on a wrong code (re-uses the "shake" animation) */
+#vault.shake {
+  animation: shake 0.4s;
+}
+
+/* LCD screen showing dots as you type */
+#code-display {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 14px 0 6px;
+  padding: 8px 6px;
+  background: #07140c;
+  border: 2px solid #1d3a28;
+  border-radius: 6px;
+}
+#code-display .slot {
+  width: 24px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 22px;
+  color: #5cff9a;
+  border-bottom: 2px solid #2f6b47;
+}
+.vault-status {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #f5c542;
+}
+.vault-status.denied { color: #ff5a5a; }
+.vault-status.granted { color: #4cff7a; }
+
+#keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.key {
+  height: 40px;
+  border: 2px solid #5b6270;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #7d8594, #4b515c);
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.key:hover {
+  border-color: #f5c542;
+}
+.key:active {
+  transform: scale(0.95);
+}
+.key-clear,
+.key-enter {
+  font-size: 13px;
+  text-transform: uppercase;
+}
+.key-clear { background: linear-gradient(180deg, #a04545, #6b2a2a); }
+.key-enter { background: linear-gradient(180deg, #3f9a55, #26683a); }
+
+/* While the door is opening or the alarm is on, the keypad is locked */
+#vault.locked .key {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.unlock-banner {
+  margin: 14px 0 0;
+  font-size: 40px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #66bb6a;
+  text-shadow: 0 0 18px rgba(102, 187, 106, 0.6);
+  animation: pop 0.4s;
+}
+
+/* ---------- Result screen ---------- */
+.final-score {
+  font-size: 20px;
+  margin: 20px 0;
+}
+#result-title.win { color: #66bb6a; font-size: 44px; }
+#result-title.lose { color: #ef5350; font-size: 44px; }
+
+/* ---------- Smaller screens (phones / small windows) ---------- */
+@media (max-width: 640px) {
+  #game { padding: 20px 14px; }
+  #answers { grid-template-columns: 1fr; }
+  .door-layout { flex-direction: column; }
+  #wheel { width: 130px; height: 130px; border-width: 8px; }
+  #keypad-panel { max-width: none; width: 100%; }
+  .reveal {
+    grid-template-columns: 1fr;
+    grid-template-areas: "label" "digit" "note" "btn";
+    text-align: center;
+  }
+  .reveal .btn { justify-self: center; }
+  .unlock-banner { font-size: 30px; }
+}
+
+/* =====================================================
+   NEW IN VERSION 3
+   (navigation row, theme cards, result summary)
+   ===================================================== */
+
+/* ---------- Navigation row (Back to Themes / Homepage buttons) ---------- */
+.nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.theme-badge {
+  flex: 1;
+  text-align: center;
+  color: #f5c542;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+/* ---------- Theme selection cards ---------- */
+.theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 18px 0 10px;
+}
+.theme-card {
+  background: #2a2f3a;
+  color: #f2f2f2;
+  border: 3px solid #4a5160;
+  border-radius: 14px;
+  padding: 18px 14px;
+  text-align: center;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.12s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.theme-card:hover {
+  border-color: #f5c542;
+  background: #343a47;
+  transform: translateY(-3px);
+}
+.theme-card.selected {
+  border-color: #f5c542;
+  background: #3a3520;
+  box-shadow: 0 0 18px rgba(245, 197, 66, 0.55);
+}
+.theme-icon {
+  display: block;
+  font-size: 44px;
+  margin-bottom: 6px;
+}
+.theme-name {
+  display: block;
+  font-size: 22px;
+  font-weight: bold;
+  color: #f5c542;
+  margin-bottom: 6px;
+}
+.theme-desc {
+  display: block;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #d8dce4;
+}
+.theme-hint {
+  min-height: 22px;
+  margin: 6px 0 12px;
+  color: #bfc5d0;
+}
+
+/* ---------- Second button style (used for "Back to Homepage") ---------- */
+.btn-secondary {
+  background: #2a2f3a;
+  color: #f5c542;
+  border: 2px solid #c9a227;
+}
+.btn-secondary:hover {
+  background: #343a47;
+}
+
+/* ---------- Digit progress on the vault screen ---------- */
+.vault-progress {
+  display: block;
+  margin: 6px 0 0;
+}
+
+/* ---------- Result summary cards ---------- */
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 20px 0;
+}
+.result-card {
+  background: #101216;
+  border: 2px solid #3a3f4a;
+  border-radius: 10px;
+  padding: 12px 8px;
+}
+.rc-label {
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #bfc5d0;
+  margin-bottom: 6px;
+}
+.rc-value {
+  font-size: 22px;
+  font-weight: bold;
+  color: #f5c542;
+}
+.rc-value.good { color: #66bb6a; }
+.rc-value.bad { color: #ef5350; }
+.result-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+@media (max-width: 640px) {
+  .theme-grid { grid-template-columns: 1fr; }
+  .result-grid { grid-template-columns: 1fr 1fr; }
+  .nav-row { flex-wrap: wrap; }
+  .theme-badge { order: 3; flex-basis: 100%; }
+}
+
+.music-hint {
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: #8a8f99;
+}
+
+/* =====================================================
+   NEW IN VERSION 4
+   (homepage redesign + digit reveal shown twice)
+   ===================================================== */
+
+/* ---------- Page background: dark with a faint vault-ring pattern ---------- */
+body {
+  padding: 24px 0;
+  background:
+    repeating-radial-gradient(circle at 50% 30%, rgba(201, 162, 39, 0.045) 0 2px, transparent 2px 38px),
+    radial-gradient(circle at 50% 30%, #2b2f36 0%, #0c0d10 80%);
+}
+#game {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---------- Homepage ---------- */
+#start-screen {
+  position: relative;
+}
+/* Faint vault-ring pattern behind the homepage content */
+#start-screen::before {
+  content: "";
+  position: absolute;
+  inset: -90px -40px -40px -40px;   /* reaches up behind the music bar too */
+  z-index: 0;
+  pointer-events: none;
+  background:
+    repeating-radial-gradient(circle at 50% 22%, rgba(201, 162, 39, 0.08) 0 2px, transparent 2px 24px),
+    radial-gradient(circle at 50% 22%, rgba(245, 197, 66, 0.16), transparent 55%);
+}
+#start-screen > * {
+  position: relative;
+  z-index: 1;
+}
+
+.hero {
+  padding-top: 4px;
+}
+
+/* The vault emblem (made with CSS only) */
+.hero-vault {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  border: 8px solid #444a55;
+  background: radial-gradient(circle at 35% 30%, #b9c0cc, #5a606c 55%, #2e323b);
+  box-shadow:
+    0 0 0 4px #c9a227,
+    0 0 28px rgba(245, 197, 66, 0.45),
+    inset 0 0 18px rgba(0, 0, 0, 0.6);
+  animation: vaultGlow 3.5s ease-in-out infinite;
+}
+.hv-ring {
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  border: 3px dashed rgba(245, 197, 66, 0.6);
+  animation: spinSlow 40s linear infinite;
+}
+.hv-spoke {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  right: 6px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #d0d5de, #6a7180 60%, #3c414c);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+.hv-spoke.s1 { transform: rotate(0deg); }
+.hv-spoke.s2 { transform: rotate(60deg); }
+.hv-spoke.s3 { transform: rotate(120deg); }
+.hv-hub {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f5d77a, #b88a14 65%, #6b4f0e);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7), 0 0 14px rgba(245, 197, 66, 0.5);
+}
+
+.hero-eyebrow {
+  margin: 4px 0 0;
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: #c9a227;
+}
+.hero-title {
+  margin: 6px 0 8px;
+  font-size: 56px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: #f5c542;
+  text-shadow: 0 0 20px rgba(245, 197, 66, 0.45), 0 3px 0 #6b4f0e;
+}
+.hero-title span {
+  display: block;
+  margin-top: 8px;
+  font-size: 30px;
+  letter-spacing: 14px;
+  color: #f2f2f2;
+  text-shadow: 0 2px 0 #000;
+}
+
+/* ---------- Mission briefing panel ---------- */
+.briefing {
+  margin: 18px auto 22px;
+  padding: 18px 18px 16px;
+  text-align: left;
+  background: rgba(10, 11, 14, 0.85);
+  border: 2px solid #3a3f4a;
+  border-radius: 14px;
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.6);
+}
+.briefing-head {
+  margin-bottom: 12px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 5px;
+  color: #bfc5d0;
+}
+
+/* The big "6 secret code digits" box */
+.spotlight {
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  background: linear-gradient(180deg, rgba(245, 197, 66, 0.16), rgba(245, 197, 66, 0.05));
+  border: 3px solid #f5c542;
+  border-radius: 12px;
+  animation: goldPulse 3s ease-in-out infinite;
+}
+.spot-title {
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #f5c542;
+  text-align: center;
+  text-shadow: 0 0 14px rgba(245, 197, 66, 0.5);
+}
+.spot-title strong {
+  color: #fff;
+  background: #b88a14;
+  padding: 2px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.spot-text {
+  margin: 10px 0 8px;
+  text-align: center;
+  color: #e8ebf0;
+  font-size: 16px;
+}
+.spot-warning {
+  margin: 0;
+  padding: 10px 12px;
+  background: #1c1a0c;
+  border-left: 5px solid #f5c542;
+  border-radius: 6px;
+  color: #ffe08a;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.spot-warning strong {
+  color: #f5c542;
+}
+
+/* The other rules */
+.rule-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.rule-grid li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #1c1f26;
+  border: 1px solid #3a3f4a;
+  border-radius: 8px;
+  color: #d8dce4;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.rule-grid .ri {
+  flex: 0 0 auto;
+  font-size: 22px;
+}
+.rule-grid strong {
+  color: #f5c542;
+}
+
+/* The big Start Game button */
+.btn-start {
+  font-size: 24px;
+  padding: 16px 60px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f5c542, #c9a227);
+  box-shadow: 0 6px 0 #6b4f0e, 0 0 0 0 rgba(245, 197, 66, 0.6);
+  animation: startPulse 2.4s ease-out infinite;
+}
+.btn-start:hover {
+  background: linear-gradient(180deg, #ffd95e, #e0b52e);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 9px 0 #6b4f0e, 0 0 26px 4px rgba(245, 197, 66, 0.55);
+  animation: none;
+}
+.btn-start:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #6b4f0e;
+}
+.music-hint {
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: #8a8f99;
+}
+
+/* Gentle animations (kept small and slow) */
+@keyframes vaultGlow {
+  0%, 100% { box-shadow: 0 0 0 4px #c9a227, 0 0 20px rgba(245, 197, 66, 0.3), inset 0 0 18px rgba(0, 0, 0, 0.6); }
+  50% { box-shadow: 0 0 0 4px #f5c542, 0 0 38px rgba(245, 197, 66, 0.65), inset 0 0 18px rgba(0, 0, 0, 0.6); }
+}
+@keyframes spinSlow {
+  to { transform: rotate(360deg); }
+}
+@keyframes goldPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(245, 197, 66, 0.25); }
+  50% { box-shadow: 0 0 22px rgba(245, 197, 66, 0.55); }
+}
+@keyframes startPulse {
+  0% { box-shadow: 0 6px 0 #6b4f0e, 0 0 0 0 rgba(245, 197, 66, 0.55); }
+  70% { box-shadow: 0 6px 0 #6b4f0e, 0 0 0 18px rgba(245, 197, 66, 0); }
+  100% { box-shadow: 0 6px 0 #6b4f0e, 0 0 0 0 rgba(245, 197, 66, 0); }
+}
+
+/* ---------- Digit reveal (shown twice, no button) ---------- */
+.reveal {
+  grid-template-areas:
+    "digit label"
+    "digit note";
+}
+.reveal-label {
+  color: #f5c542;
+  font-size: 22px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+.reveal.gap {
+  border-color: #4a5160;
+}
+.reveal.gap .reveal-digit {
+  color: #5b6270;
+  text-shadow: none;
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 640px) {
+  .hero-title { font-size: 38px; letter-spacing: 2px; }
+  .hero-title span { font-size: 22px; letter-spacing: 8px; }
+  .hero-vault { width: 120px; height: 120px; }
+  .hv-hub { width: 50px; height: 50px; margin: -25px 0 0 -25px; font-size: 24px; }
+  .spot-title { font-size: 18px; }
+  .spot-title strong { display: inline-block; margin: 4px 0; padding: 2px 8px; white-space: normal; }
+  .rule-grid { grid-template-columns: 1fr; }
+  .btn-start { width: 100%; padding: 16px 20px; }
+  .reveal {
+    grid-template-areas: "label" "digit" "note";
+  }
+  .reveal-label { font-size: 18px; }
+}
+
+/* People who prefer less motion get no animation */
+@media (prefers-reduced-motion: reduce) {
+  .hero-vault, .hv-ring, .spotlight, .btn-start {
+    animation: none;
+  }
+}
+
+
+/* =====================================================
+   NEW IN VERSION 5: MEMORISE THE SAFE CODE SCREEN
+   ===================================================== */
+#memorise-screen {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;          /* keeps the background pattern behind the text */
+}
+
+/* Subtle vault-inspired background: gold glow + metallic rings */
+#memorise-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 52%, rgba(245, 197, 66, 0.12), transparent 62%),
+    repeating-radial-gradient(circle at 50% 52%,
+      rgba(255, 255, 255, 0.035) 0 2px, transparent 2px 40px);
+}
+
+.memo-title {
+  color: #f5c542;
+  font-size: clamp(22px, 5vw, 32px);
+  letter-spacing: 3px;
+  margin: 6px 0 10px;
+  text-shadow: 0 0 14px rgba(245, 197, 66, 0.45);
+}
+.memo-instruction {
+  max-width: 520px;
+  margin: 0 auto 22px;
+  color: #e6e8ee;
+  line-height: 1.5;
+}
+
+/* The six code digits: big, bold and gold */
+.memo-code {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(6px, 1.6vw, 12px);
+  margin: 0 auto 24px;
+}
+.memo-digit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(42px, 11vw, 78px);
+  height: clamp(58px, 15vw, 100px);
+  background: linear-gradient(180deg, #14161b, #0a0b0e);
+  border: 3px solid #c9a227;
+  border-radius: 10px;
+  color: #f5c542;
+  font-family: "Courier New", Consolas, monospace;
+  font-size: clamp(34px, 9vw, 64px);
+  font-weight: 800;
+  text-shadow: 0 0 12px rgba(245, 197, 66, 0.6);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.8), 0 0 14px rgba(201, 162, 39, 0.25);
+}
+
+/* Countdown number */
+.memo-timer-wrap {
+  margin: 0 auto 18px;
+}
+.memo-timer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 104px;
+  height: 104px;
+  margin: 0 auto 12px;
+  border: 5px solid #f5c542;      /* gold during the normal countdown (10-4) */
+  border-radius: 50%;
+  background: #101216;
+  color: #f5c542;
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 0 14px rgba(245, 197, 66, 0.35);
+  transition: color 0.2s, border-color 0.2s;
+}
+/* Final 3 seconds: bright red, gentle pulse and glow */
+.memo-timer.final {
+  color: #ff3b3b;
+  border-color: #ff3b3b;
+  box-shadow: 0 0 22px rgba(255, 59, 59, 0.65);
+  animation: memoPulse 1s ease-in-out infinite;
+}
+@keyframes memoPulse {
+  0%, 100% { transform: scale(1);    box-shadow: 0 0 14px rgba(255, 59, 59, 0.45); }
+  50%      { transform: scale(1.12); box-shadow: 0 0 30px rgba(255, 59, 59, 0.85); }
+}
+
+/* Thin bar that drains over the memorise time (just decoration; the real timer is in game.js) */
+.memo-bar {
+  width: min(320px, 80%);
+  height: 8px;
+  margin: 0 auto;
+  background: #101216;
+  border: 1px solid #3a3f4a;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.memo-bar-fill {
+  width: 100%;
+  height: 100%;
+  background: #f5c542;
+  transform-origin: left center;
+}
+.memo-bar-fill.running {
+  animation: memoDrain 5s linear forwards;  /* game.js sets the real length */
+}
+@keyframes memoDrain {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+.memo-reminder {
+  color: #bfc5d0;
+  font-size: 15px;
+  margin-top: 14px;
+}
+
+/* Smooth fade when the keypad screen opens after the countdown */
+#code-screen.active {
+  animation: screenFade 0.6s ease-out;
+}
+@keyframes screenFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* People who prefer less motion: no pulsing or fading */
+@media (prefers-reduced-motion: reduce) {
+  .memo-timer.final { animation: none; }
+  #code-screen.active { animation: none; }
+}
